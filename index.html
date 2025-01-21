@@ -19,68 +19,131 @@
     </div>
 
     <div class="container">
+        <!-- Hunt View -->
+        <div id="hunt-view" class="main-section">
+            <div class="hunt-area">
+                <!-- Current Sword Display -->
+                <div class="sword-display">
+                    <h2>Current Sword</h2>
+                    <div class="sword-image" id="current-sword-image"></div>
+                    <h3 id="sword-name">Wooden Sword</h3>
+                    <div class="stat-bar">
+                        <div>Damage: <span id="damage">3-5</span></div>
+                        <div>Attack Speed: <span id="attack-speed">1.0</span></div>
+                        <div>Durability: <progress id="durability" value="100" max="100"></progress></div>
+                    </div>
+                    <div class="sword-properties">
+                        <div>Rarity: <span class="rarity-color common" id="rarity">Common</span></div>
+                        <div>Element: <span id="element">None</span></div>
+                        <div>Critical Chance: <span id="crit-chance">0%</span></div>
+                        <div>Loot Bonus: <span id="loot-bonus">0%</span></div>
+                    </div>
+                </div>
+
+                <!-- Monster Display -->
+                <div class="monster-display">
+                    <h2>Current Monster</h2>
+                    <div class="stat-bar">
+                        <div>Health: <progress id="monster-health" value="100" max="100"></progress></div>
+                        <div>Element: <span id="monster-element">None</span></div>
+                    </div>
+                    <div class="monster-status" id="monster-status"></div>
+                    <button class="button" id="attack-button">Attack Monster</button>
+                    <div class="monster-rewards">
+                        <span>Potential Scrap Reward: <span id="monster-reward">0</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Forge View -->
         <div id="forge-view" class="main-section active-view">
-            <div class="sword-display">
-                <div class="sword-image" id="current-sword-image"></div>
-                <h2 id="sword-name">Wooden Sword</h2>
-                <div class="stat-bar">
-                    Damage: <span id="damage">3-5</span> |
-                    Attack Speed: <span id="attack-speed">1.0</span> |
-                    Durability: <progress id="durability" value="100" max="100"></progress>
+            <div class="forge-area">
+                <!-- Current Sword Display -->
+                <div class="sword-display">
+                    <h2>Current Sword</h2>
+                    <div class="sword-image" id="forge-sword-image"></div>
+                    <h3 id="forge-sword-name">Wooden Sword</h3>
+                    <div class="stat-bar">
+                        <div>Damage: <span id="forge-damage">3-5</span></div>
+                        <div>Attack Speed: <span id="forge-attack-speed">1.0</span></div>
+                        <div>Durability: <progress id="forge-durability" value="100" max="100"></progress></div>
+                    </div>
+                    <div class="sword-properties">
+                        <div>Rarity: <span class="rarity-color common" id="forge-rarity">Common</span></div>
+                        <div>Element: <span id="forge-element">None</span></div>
+                        <div>Critical Chance: <span id="forge-crit-chance">0%</span></div>
+                        <div>Loot Bonus: <span id="forge-loot-bonus">0%</span></div>
+                    </div>
                 </div>
-                <div id="special-effects">No special effects</div>
-            </div>
 
-            <button class="button" onclick="forgeSword()">Forge New Sword (50 Scrap)</button>
-            <button class="button" onclick="upgradeSword()">Upgrade Sword (100 Scrap)</button>
-            <button class="button" onclick="toggleAutoForge()">Auto-Forge: Off</button>
+                <!-- Forge Controls -->
+                <div class="forge-controls">
+                    <h2>Forge Actions</h2>
+                    <button class="button" onclick="forgeSword()">Forge New Sword (50 Scrap)</button>
+                    <button class="button" onclick="upgradeSword()">Upgrade Sword (100 Scrap)</button>
+                    <button class="button" onclick="toggleAutoForge()">Auto-Forge: Off</button>
+                </div>
+
+                <!-- Blacksmith Upgrades -->
+                <div class="upgrades">
+                    <h2>Blacksmith Upgrades</h2>
+                    <div id="upgrades-list">
+                        <button class="button" onclick="purchaseUpgrade('autoForgeSpeed')">Faster Forging (1000 Scrap)</button>
+                        <button class="button" onclick="purchaseUpgrade('scrapEfficiency')">Scrap Bonus (500 Scrap)</button>
+                        <button class="button" onclick="purchaseUpgrade('criticalStrike')">Critical Strikes (750 Scrap)</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Monster Display -->
-        <div class="monster-display">
-            <h3>Current Monster</h3>
-            <div class="stat-bar">
-                <div>Health: <progress id="monster-health" value="100" max="100"></progress></div>
-                <div>Element: <span id="monster-element">None</span></div>
-            </div>
-            <div class="monster-status" id="monster-status"></div>
-            <button class="button" id="attack-button">Attack Monster</button>
-            <div class="monster-rewards">
-                <span>Potential Scrap Reward: <span id="monster-reward">0</span></span>
-            </div>
-        </div>
-
-        <!-- Crafting View -->
+        <!-- Craft View -->
         <div id="craft-view" class="main-section">
-            <div class="crafting-parts">
-                <div class="part-selector" id="blade-selector"></div>
-                <div class="part-selector" id="hilt-selector"></div>
-                <div class="part-selector" id="gem-selector"></div>
-            </div>
-            <button class="button" onclick="craftSword()">Craft Sword</button>
-        </div>
+            <div class="craft-area">
+                <!-- Current Sword Display -->
+                <div class="sword-display">
+                    <h2>Current Sword</h2>
+                    <div class="sword-image" id="craft-sword-image"></div>
+                    <h3 id="craft-sword-name">Wooden Sword</h3>
+                    <div class="stat-bar">
+                        <div>Damage: <span id="craft-damage">3-5</span></div>
+                        <div>Attack Speed: <span id="craft-attack-speed">1.0</span></div>
+                        <div>Durability: <progress id="craft-durability" value="100" max="100"></progress></div>
+                    </div>
+                    <div class="sword-properties">
+                        <div>Rarity: <span class="rarity-color common" id="craft-rarity">Common</span></div>
+                        <div>Element: <span id="craft-element">None</span></div>
+                        <div>Critical Chance: <span id="craft-crit-chance">0%</span></div>
+                        <div>Loot Bonus: <span id="craft-loot-bonus">0%</span></div>
+                    </div>
+                </div>
 
-        <div class="stats">
-            <h3>Sword Properties</h3>
-            <div id="sword-stats">
-                <div>Rarity: <span class="rarity-color common" id="rarity">Common</span></div>
-                <div>Element: <span id="element">None</span></div>
-                <div>Critical Chance: <span id="crit-chance">0%</span></div>
-                <div>Loot Bonus: <span id="loot-bonus">0%</span></div>
-            </div>
-
-            <h3>Combat Log</h3>
-            <div class="combat-log" id="combat-log"></div>
-
-            <div class="upgrades">
-                <h3>Blacksmith Upgrades</h3>
-                <div id="upgrades-list">
-                    <button class="button" onclick="purchaseUpgrade('autoForgeSpeed')">Faster Forging (1000 Scrap)</button>
-                    <button class="button" onclick="purchaseUpgrade('scrapEfficiency')">Scrap Bonus (500 Scrap)</button>
-                    <button class="button" onclick="purchaseUpgrade('criticalStrike')">Critical Strikes (750 Scrap)</button>
+                <!-- Crafting Controls -->
+                <div class="crafting-controls">
+                    <h2>Craft New Sword</h2>
+                    <div class="crafting-parts">
+                        <div class="part-selector">
+                            <h3>Blade</h3>
+                            <div id="blade-selector"></div>
+                        </div>
+                        <div class="part-selector">
+                            <h3>Hilt</h3>
+                            <div id="hilt-selector"></div>
+                        </div>
+                        <div class="part-selector">
+                            <h3>Gem</h3>
+                            <div id="gem-selector"></div>
+                        </div>
+                    </div>
+                    <button class="button" onclick="craftSword()">Craft Sword</button>
                 </div>
             </div>
+        </div>
+
+        <!-- Right Side Panel -->
+        <div class="stats">
+            <h2>Combat Log</h2>
+            <div class="combat-log" id="combat-log"></div>
         </div>
     </div>
 
