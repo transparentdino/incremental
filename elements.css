@@ -1,0 +1,167 @@
+/* Base Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background: #2a2a2a;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 20px 20px 20px 140px;
+}
+
+/* Layout Components */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 120px;
+    background: #363636;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-right: 2px solid #555;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 20px;
+}
+
+/* Main Sections */
+.main-section {
+    background: #363636;
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid #555;
+    display: none;
+}
+
+.active-view {
+    display: block !important;
+}
+
+/* Sword Display */
+.sword-display {
+    text-align: center;
+    margin: 20px 0;
+    padding: 20px;
+    background: #2a2a2a;
+    border-radius: 8px;
+}
+
+.sword-image {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    background: #555;
+    border: 3px solid #777;
+    border-radius: 8px;
+}
+
+/* Buttons */
+.button {
+    background: #4a4a4a;
+    border: 2px solid #666;
+    color: white;
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.button:hover {
+    background: #5a5a5a;
+    border-color: #777;
+}
+
+/* Resource and Stat Bars */
+.resource-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #3a3a3a;
+    border-radius: 8px;
+}
+
+.stat-bar {
+    margin: 10px 0;
+    padding: 8px;
+    background: #3a3a3a;
+    border-radius: 4px;
+}
+
+/* Combat Log */
+.combat-log {
+    height: 300px;
+    overflow-y: auto;
+    background: #2a2a2a;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+/* Rarity Colors */
+.rarity-color {
+    font-weight: bold;
+}
+
+.common { color: #a0a0a0; }
+.uncommon { color: #00ff00; }
+.rare { color: #0080ff; }
+.epic { color: #8000ff; }
+.legendary { color: #ff8000; }
+
+/* Upgrades Section */
+.upgrades {
+    background: #363636;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+/* Monster Display */
+.monster-display {
+    background: #363636;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.monster-status {
+    padding: 10px;
+    background: #4a4a4a;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+.monster-rewards {
+    margin-top: 10px;
+    padding: 10px;
+    background: #2a2a2a;
+    border-radius: 4px;
+}
+
+/* Status Effects */
+.status-effect {
+    display: inline-block;
+    padding: 3px 8px;
+    margin: 2px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+.fire { background: #ff440044; }
+.ice { background: #00ffff44; }
+.poison { background: #aa00ff44; }
+
+/* Progress Bars */
+#monster-health {
+    width: 200px;
+    height: 20px;
+    margin: 0 10px;
+}

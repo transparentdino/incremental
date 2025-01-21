@@ -1,0 +1,30 @@
+{
+  "name": "sword-forge-incremental",
+  "version": "1.0.0",
+  "description": "An incremental game about forging swords and slaying monsters",
+  "main": "index.html",
+  "config": {
+    "nw": {
+      "window": {
+        "title": "Sword Forge Incremental",
+        "width": 1280,
+        "height": 720,
+        "min_width": 800,
+        "min_height": 600,
+        "position": "center",
+        "icon": "icon.png"
+      }
+    }
+  },
+  "dependencies": {
+    "nw": "^0.83.0-sdk"
+  },
+  "scripts": {
+    "start": "nw .",
+    "build": "nwbuild -p win64,linux64,osx64 .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["incremental", "game", "nwjs"],
+  "author": "Your Name <your.email@example.com>",
+  "license": "ISC"
+}

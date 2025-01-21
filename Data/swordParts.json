@@ -1,0 +1,60 @@
+{
+    "blades": [
+        {
+            "name": "Wooden",
+            "damageMultiplier": 0.5,
+            "scrapCost": 0
+        },
+        {
+            "name": "Rusted",
+            "damageMultiplier": 0.8,
+            "scrapCost": 20
+        },
+        {
+            "name": "Iron",
+            "damageMultiplier": 1.0,
+            "scrapCost": 50
+        },
+        {
+            "name": "Steel",
+            "damageMultiplier": 1.2,
+            "scrapCost": 100
+        }
+    ],
+    "hilts": [
+        {
+            "name": "Simple",
+            "attackSpeedBonus": 0.05,
+            "scrapCost": 0
+        },
+        {
+            "name": "Leather",
+            "attackSpeedBonus": 0.1,
+            "scrapCost": 30
+        },
+        {
+            "name": "Chain",
+            "attackSpeedBonus": 0.2,
+            "scrapCost": 60
+        },
+        {
+            "name": "Dragonbone",
+            "attackSpeedBonus": 0.3,
+            "scrapCost": 120
+        }
+    ],
+    "gems": [
+        {
+            "name": "Ruby",
+            "element": "Fire",
+            "effect": "Burn",
+            "scrapCost": 150
+        },
+        {
+            "name": "Sapphire",
+            "element": "Ice",
+            "effect": "Freeze",
+            "scrapCost": 150
+        }
+    ]
+}

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sword Forge Incremental</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 20px;
+        }
+
+        .main-section {
+            background: #363636;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #555;
+        }
+
+        .stats {
+            background: #454545;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #666;
+        }
+
+        .sword-display {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 8px;
+        }
+
+        .sword-image {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            background: #555;
+            border: 3px solid #777;
+            border-radius: 8px;
+        }
+
+        .button {
+            background: #4a4a4a;
+            border: 2px solid #666;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .button:hover {
+            background: #5a5a5a;
+            border-color: #777;
+        }
+
+        .resource-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #3a3a3a;
+            border-radius: 8px;
+        }
+
+        .stat-bar {
+            margin: 10px 0;
+            padding: 8px;
+            background: #3a3a3a;
+            border-radius: 4px;
+        }
+
+        .combat-log {
+            height: 300px;
+            overflow-y: auto;
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .rarity-color {
+            font-weight: bold;
+        }
+
+        .common { color: #a0a0a0; }
+        .uncommon { color: #00ff00; }
+        .rare { color: #0080ff; }
+        .epic { color: #8000ff; }
+        .legendary { color: #ff8000; }
+    </style>
+</head>
+<body>
+    <div class="resource-bar">
+        <div>Scrap: <span id="scrap">0</span></div>
+        <div>Current Tier: <span id="tier">I</span></div>
+    </div>
+
+    <div class="container">
+        <div class="main-section">
+            <div class="sword-display">
+                <div class="sword-image" id="current-sword-image"></div>
+                <h2 id="sword-name">Rusty Iron Blade</h2>
+                <div class="stat-bar">
+                    Damage: <span id="damage">10-15</span> |
+                    Attack Speed: <span id="attack-speed">1.2</span> |
+                    Durability: <progress id="durability" value="100" max="100"></progress>
+                </div>
+                <div id="special-effects">No special effects</div>
+            </div>
+
+            <button class="button" onclick="forgeSword()">Forge New Sword (50 Scrap)</button>
+            <button class="button" onclick="upgradeSword()">Upgrade Sword (100 Scrap)</button>
+            <button class="button" onclick="toggleAutoForge()">Auto-Forge: Off</button>
+        </div>
+
+        <div class="stats">
+            <h3>Sword Properties</h3>
+            <div id="sword-stats">
+                <div>Rarity: <span class="rarity-color common" id="rarity">Common</span></div>
+                <div>Element: <span id="element">None</span></div>
+                <div>Critical Chance: <span id="crit-chance">5%</span></div>
+                <div>Loot Bonus: <span id="loot-bonus">0%</span></div>
+            </div>
+
+            <h3>Combat Log</h3>
+            <div class="combat-log" id="combat-log">
+                <!-- Combat messages will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            scrap: 0,
+            currentTier: 1,
+            currentSword: null,
+            autoForgeInterval: null,
+            autoForgeActive: false
+        };
+
+        class Sword {
+            constructor(tier) {
+                this.tier = tier;
+                this.baseDamage = Math.floor(10 * Math.pow(1.5, tier-1));
+                this.damageVariance = 0.3;
+                this.attackSpeed = (1 + tier * 0.2).toFixed(1);
+                this.durability = 100;
+                this.rarity = this.calculateRarity();
+                this.element = this.randomElement();
+                this.modifiers = this.calculateModifiers();
+            }
+
+            calculateRarity() {
+                const rand = Math.random();
+                if (rand < 0.5) return 'Common';
+                if (rand < 0.8) return 'Uncommon';
+                if (rand < 0.95) return 'Rare';
+                if (rand < 0.99) return 'Epic';
+                return 'Legendary';
+            }
+
+            randomElement() {
+                const elements = ['None', 'Fire', 'Ice', 'Lightning', 'Poison'];
+                return elements[Math.floor(Math.random() * elements.length)];
+            }
+
+            calculateModifiers() {
+                return {
+                    critChance: Math.min(5 + (this.tier * 2), 35) + '%',
+                    lootBonus: Math.floor(this.tier * 3) + '%'
+                };
+            }
+        }
+
+        function forgeSword() {
+            if (gameState.scrap < 50) return;
+            gameState.scrap -= 50;
+            gameState.currentSword = new Sword(gameState.currentTier);
+            updateDisplay();
+            addLogMessage("Forged new sword!");
+        }
+
+        function upgradeSword() {
+            if (gameState.scrap < 100 || !gameState.currentSword) return;
+            gameState.scrap -= 100;
+            gameState.currentTier++;
+            updateDisplay();
+            addLogMessage(`Upgraded to Tier ${gameState.currentTier}!`);
+        }
+
+        function toggleAutoForge() {
+            gameState.autoForgeActive = !gameState.autoForgeActive;
+            const button = document.querySelector('[onclick="toggleAutoForge()"]');
+            button.textContent = `Auto-Forge: ${gameState.autoForgeActive ? 'On' : 'Off'}`;
+            
+            if (gameState.autoForgeActive) {
+                gameState.autoForgeInterval = setInterval(() => {
+                    if (gameState.scrap >= 50) forgeSword();
+                }, 3000);
+            } else {
+                clearInterval(gameState.autoForgeInterval);
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('scrap').textContent = gameState.scrap;
+            document.getElementById('tier').textContent = gameState.currentTier;
+            
+            if (gameState.currentSword) {
+                const sword = gameState.currentSword;
+                document.getElementById('sword-name').textContent = `${sword.element} Sword Tier ${sword.tier}`;
+                document.getElementById('damage').textContent = 
+                    `${Math.floor(sword.baseDamage * (1 - sword.damageVariance))}-${Math.floor(sword.baseDamage * (1 + sword.damageVariance))}`;
+                document.getElementById('attack-speed').textContent = sword.attackSpeed;
+                document.getElementById('rarity').className = `rarity-color ${sword.rarity.toLowerCase()}`;
+                document.getElementById('rarity').textContent = sword.rarity;
+                document.getElementById('element').textContent = sword.element;
+                document.getElementById('crit-chance').textContent = sword.modifiers.critChance;
+                document.getElementById('loot-bonus').textContent = sword.modifiers.lootBonus;
+            }
+        }
+
+        function addLogMessage(message) {
+            const log = document.getElementById('combat-log');
+            log.innerHTML += `<div>${message}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Simulate gaining scrap
+        setInterval(() => {
+            gameState.scrap += Math.floor(gameState.currentTier * 1.5);
+            updateDisplay();
+        }, 1000);
+
+        // Initialize first sword
+        gameState.currentSword = new Sword(1);
+        updateDisplay();
+    </script>
+</body>
+</html>

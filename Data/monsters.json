@@ -1,0 +1,33 @@
+{
+    "tiers": [
+        {
+            "level": 1,
+            "monsters": [
+                {
+                    "name": "Giant Rat",
+                    "health": 100,
+                    "scrapReward": 20,
+                    "attacks": ["Bite"]
+                },
+                {
+                    "name": "Wild Boar",
+                    "health": 150,
+                    "scrapReward": 30,
+                    "attacks": ["Charge"]
+                }
+            ]
+        },
+        {
+            "level": 2,
+            "monsters": [
+                {
+                    "name": "Firewolf",
+                    "health": 300,
+                    "scrapReward": 60,
+                    "attacks": ["Fire Breath"],
+                    "element": "Fire"
+                }
+            ]
+        }
+    ]
+}
