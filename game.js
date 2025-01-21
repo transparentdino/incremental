@@ -98,8 +98,8 @@ class Monster {
     }
 }
 // Combat Functions
-// Make attackMonster function globally accessible
-    window.attackMonster = function() {
+// Consolidated attack function
+function performAttack() {
     if (!gameState.currentMonster || gameState.currentMonster.health <= 0) {
         spawnMonster();
         return;
@@ -118,7 +118,6 @@ class Monster {
     const previousHealth = gameState.currentMonster.health;
     gameState.currentMonster.health = Math.max(0, gameState.currentMonster.health - finalDamage);
     
-    // Debug output
     console.log('Attack Details:', {
         sword: sword,
         baseDamage: damage,
@@ -134,10 +133,8 @@ class Monster {
         addLogMessage(`Hit ${gameState.currentMonster.name} for ${finalDamage} damage!`);
     }
 
-    // Update monster health display immediately
     updateMonsterDisplay();
 
-    // Apply element effects
     if (sword.element === 'Fire' && !gameState.statusEffects.find(e => e.type === 'Burn')) {
         applyStatusEffect('Burn', damage * 0.2);
     } else if (sword.element === 'Ice' && !gameState.statusEffects.find(e => e.type === 'Freeze')) {
@@ -150,7 +147,10 @@ class Monster {
 
     processStatusEffects();
     updateGameDisplay();
-};
+}
+
+// Make attack function globally accessible
+window.attackMonster = performAttack;
 
 function calculateDamage(sword) {
     if (!sword) return 0;
@@ -390,42 +390,7 @@ function setupEventListeners() {
     const attackButton = document.getElementById('attack-button');
     if (attackButton) {
         attackButton.addEventListener('click', () => {
-            if (!gameState.currentMonster || gameState.currentMonster.health <= 0) {
-                spawnMonster();
-                return;
-            }
-
-            if (!gameState.currentSword) {
-                addLogMessage("You need a sword to attack!");
-                return;
-            }
-
-            const sword = gameState.currentSword;
-            const damage = calculateDamage(sword);
-            const isCritical = Math.random() < (parseFloat(sword.modifiers.critChance) / 100);
-            
-            const finalDamage = isCritical ? damage * 2 : damage;
-            gameState.currentMonster.health -= finalDamage;
-            
-            if (isCritical) {
-                addLogMessage(`Critical hit! Dealt ${finalDamage} damage to ${gameState.currentMonster.name}!`);
-            } else {
-                addLogMessage(`Hit ${gameState.currentMonster.name} for ${finalDamage} damage!`);
-            }
-
-            // Apply element effects
-            if (sword.element === 'Fire' && !gameState.statusEffects.find(e => e.type === 'Burn')) {
-                applyStatusEffect('Burn', damage * 0.2);
-            } else if (sword.element === 'Ice' && !gameState.statusEffects.find(e => e.type === 'Freeze')) {
-                applyStatusEffect('Freeze', damage * 0.1);
-            }
-
-            if (gameState.currentMonster.health <= 0) {
-                handleMonsterDefeat();
-            }
-
-            processStatusEffects();
-            updateGameDisplay();
+            performAttack();
         });
     }
 
