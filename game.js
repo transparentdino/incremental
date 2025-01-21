@@ -98,59 +98,7 @@ class Monster {
     }
 }
 // Combat Functions
-// Make attackMonster function globally accessible
-    window.attackMonster = function() {
-    if (!gameState.currentMonster || gameState.currentMonster.health <= 0) {
-        spawnMonster();
-        return;
-    }
 
-    if (!gameState.currentSword) {
-        addLogMessage("You need a sword to attack!");
-        return;
-    }
-
-    const sword = gameState.currentSword;
-    const damage = calculateDamage(sword);
-    const isCritical = Math.random() < (parseFloat(sword.modifiers.critChance) / 100);
-    
-    const finalDamage = isCritical ? damage * 2 : damage;
-    const previousHealth = gameState.currentMonster.health;
-    gameState.currentMonster.health = Math.max(0, gameState.currentMonster.health - finalDamage);
-    
-    // Debug output
-    console.log('Attack Details:', {
-        sword: sword,
-        baseDamage: damage,
-        isCritical: isCritical,
-        finalDamage: finalDamage,
-        previousHealth: previousHealth,
-        newHealth: gameState.currentMonster.health
-    });
-
-    if (isCritical) {
-        addLogMessage(`Critical hit! Dealt ${finalDamage} damage to ${gameState.currentMonster.name}!`);
-    } else {
-        addLogMessage(`Hit ${gameState.currentMonster.name} for ${finalDamage} damage!`);
-    }
-
-    // Update monster health display immediately
-    updateMonsterDisplay();
-
-    // Apply element effects
-    if (sword.element === 'Fire' && !gameState.statusEffects.find(e => e.type === 'Burn')) {
-        applyStatusEffect('Burn', damage * 0.2);
-    } else if (sword.element === 'Ice' && !gameState.statusEffects.find(e => e.type === 'Freeze')) {
-        applyStatusEffect('Freeze', damage * 0.1);
-    }
-
-    if (gameState.currentMonster.health <= 0) {
-        handleMonsterDefeat();
-    }
-
-    processStatusEffects();
-    updateGameDisplay();
-};
 
 function calculateDamage(sword) {
     if (!sword) return 0;
@@ -209,7 +157,7 @@ function createStarterSword() {
         gem: null
     });
     // Set starter sword properties explicitly
-    starterSword.baseDamage = 10; // Base damage for starter sword
+    starterSword.baseDamage = 50; // Increased base damage for starter sword
     starterSword.attackSpeed = 1.0;
     starterSword.rarity = 'Common';
     starterSword.modifiers = {
@@ -386,70 +334,91 @@ function loadGame() {
 
 // Event Listeners
 function setupEventListeners() {
-    // Set up attack button
-    const attackButton = document.getElementById('attack-button');
-    if (attackButton) {
-        attackButton.addEventListener('click', () => {
-            if (!gameState.currentMonster || gameState.currentMonster.health <= 0) {
-                spawnMonster();
-                return;
-            }
+    try {
+        // Set up attack button with better error handling
+        const attackButton = document.getElementById('attack-button');
+        if (attackButton) {
+            attackButton.addEventListener('click', () => {
+                try {
+                    if (!gameState.currentMonster || gameState.currentMonster.health <= 0) {
+                        spawnMonster();
+                        return;
+                    }
 
-            if (!gameState.currentSword) {
-                addLogMessage("You need a sword to attack!");
-                return;
-            }
+                    if (!gameState.currentSword) {
+                        addLogMessage("You need a sword to attack!");
+                        return;
+                    }
 
-            const sword = gameState.currentSword;
-            const damage = calculateDamage(sword);
-            const isCritical = Math.random() < (parseFloat(sword.modifiers.critChance) / 100);
-            
-            const finalDamage = isCritical ? damage * 2 : damage;
-            gameState.currentMonster.health -= finalDamage;
-            
-            if (isCritical) {
-                addLogMessage(`Critical hit! Dealt ${finalDamage} damage to ${gameState.currentMonster.name}!`);
-            } else {
-                addLogMessage(`Hit ${gameState.currentMonster.name} for ${finalDamage} damage!`);
-            }
+                    const sword = gameState.currentSword;
+                    const damage = calculateDamage(sword);
+                    const isCritical = Math.random() < (parseFloat(sword.modifiers.critChance) / 100);
+                    
+                    const finalDamage = isCritical ? damage * 2 : damage;
+                    gameState.currentMonster.health -= finalDamage;
+                    
+                    if (isCritical) {
+                        addLogMessage(`Critical hit! Dealt ${finalDamage} damage to ${gameState.currentMonster.name}!`);
+                    } else {
+                        addLogMessage(`Hit ${gameState.currentMonster.name} for ${finalDamage} damage!`);
+                    }
 
-            // Apply element effects
-            if (sword.element === 'Fire' && !gameState.statusEffects.find(e => e.type === 'Burn')) {
-                applyStatusEffect('Burn', damage * 0.2);
-            } else if (sword.element === 'Ice' && !gameState.statusEffects.find(e => e.type === 'Freeze')) {
-                applyStatusEffect('Freeze', damage * 0.1);
-            }
+                    // Apply element effects
+                    if (sword.element === 'Fire' && !gameState.statusEffects.find(e => e.type === 'Burn')) {
+                        applyStatusEffect('Burn', damage * 0.2);
+                    } else if (sword.element === 'Ice' && !gameState.statusEffects.find(e => e.type === 'Freeze')) {
+                        applyStatusEffect('Freeze', damage * 0.1);
+                    }
 
-            if (gameState.currentMonster.health <= 0) {
-                handleMonsterDefeat();
-            }
+                    if (gameState.currentMonster.health <= 0) {
+                        handleMonsterDefeat();
+                    }
 
-            processStatusEffects();
-            updateGameDisplay();
+                    processStatusEffects();
+                    updateGameDisplay();
+                } catch (error) {
+                    console.error('Attack error:', error);
+                    addLogMessage('An error occurred during attack!');
+                }
+            });
+        }
+
+        // Set up view buttons with error handling
+        document.querySelectorAll('[data-view]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                try {
+                    showView(e.target.dataset.view);
+                } catch (error) {
+                    console.error('View change error:', error);
+                    addLogMessage('Failed to change view!');
+                }
+            });
         });
-    }
 
-    // Set up view buttons
-    document.querySelectorAll('[data-view]').forEach(button => {
-        button.addEventListener('click', (e) => {
-            showView(e.target.dataset.view);
+        // Set up other buttons with better error handling
+        const buttons = [
+            { selector: '[onclick="forgeSword()"]', action: forgeSword },
+            { selector: '[onclick="upgradeSword()"]', action: upgradeSword },
+            { selector: '[onclick="toggleAutoForge()"]', action: toggleAutoForge }
+        ];
+
+        buttons.forEach(btn => {
+            const button = document.querySelector(btn.selector);
+            if (button) {
+                button.onclick = () => {
+                    try {
+                        btn.action();
+                    } catch (error) {
+                        console.error('Button action error:', error);
+                        addLogMessage('Failed to perform action!');
+                    }
+                };
+            }
         });
-    });
 
-    // Set up other buttons
-    const forgeButton = document.querySelector('[onclick="forgeSword()"]');
-    if (forgeButton) {
-        forgeButton.onclick = () => forgeSword();
-    }
-
-    const upgradeButton = document.querySelector('[onclick="upgradeSword()"]');
-    if (upgradeButton) {
-        upgradeButton.onclick = () => upgradeSword();
-    }
-
-    const autoForgeButton = document.querySelector('[onclick="toggleAutoForge()"]');
-    if (autoForgeButton) {
-        autoForgeButton.onclick = () => toggleAutoForge();
+        console.log('Event listeners successfully set up');
+    } catch (error) {
+        console.error('Failed to set up event listeners:', error);
     }
 }
 
