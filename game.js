@@ -253,6 +253,7 @@ function updateGameDisplay() {
 
 // View Management
 function showView(viewName) {
+    console.log('Showing view:', viewName); // Debug log
     document.querySelectorAll('.main-section').forEach(section => {
         section.classList.remove('active-view');
     });
@@ -263,8 +264,13 @@ function showView(viewName) {
         if (viewName === 'hunt' && !gameState.currentMonster) {
             spawnMonster();
         }
+    } else {
+        console.error('View not found:', viewName);
     }
 }
+
+// Make showView available globally
+window.showView = showView;
 
 // Utility Functions
 function addLogMessage(message) {
@@ -360,7 +366,9 @@ function setupEventListeners() {
     // Set up view buttons
     document.querySelectorAll('[data-view]').forEach(button => {
         button.addEventListener('click', (e) => {
-            showView(e.target.dataset.view);
+            const viewName = e.target.getAttribute('data-view');
+            console.log('Button clicked:', viewName); // Debug log
+            showView(viewName);
         });
     });
 
