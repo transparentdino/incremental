@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "An incremental game about forging swords and slaying monsters",
   "main": "index.html",
+  "type": "module",
   "config": {
     "nw": {
       "window": {
@@ -24,7 +25,11 @@
     "build": "nwbuild -p win64,linux64,osx64 .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["incremental", "game", "nwjs"],
+  "keywords": [
+    "incremental",
+    "game",
+    "nwjs"
+  ],
   "author": "Your Name <your.email@example.com>",
   "license": "ISC"
 }
