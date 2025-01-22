@@ -75,7 +75,7 @@ function handleMonsterDefeat() {
     updateGameDisplay();
 }
 
-window.attackMonster = function() {
+function attackMonster() {
     if (!gameState.currentMonster || gameState.currentMonster.health <= 0) {
         spawnMonster();
         return;
