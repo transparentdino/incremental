@@ -323,70 +323,23 @@ function setupEventListeners() {
     // Set up attack button
     const attackButton = document.getElementById('attack-button');
     if (attackButton) {
-        attackButton.addEventListener('click', () => {
-            if (!gameState.currentMonster || gameState.currentMonster.health <= 0) {
-                spawnMonster();
-                return;
-            }
-
-            if (!gameState.currentSword) {
-                addLogMessage("You need a sword to attack!");
-                return;
-            }
-
-            const sword = gameState.currentSword;
-            const damage = calculateDamage(sword);
-            const isCritical = Math.random() < (parseFloat(sword.modifiers.critChance) / 100);
-            
-            const finalDamage = isCritical ? damage * 2 : damage;
-            gameState.currentMonster.health -= finalDamage;
-            
-            if (isCritical) {
-                addLogMessage(`Critical hit! Dealt ${finalDamage} damage to ${gameState.currentMonster.name}!`);
-            } else {
-                addLogMessage(`Hit ${gameState.currentMonster.name} for ${finalDamage} damage!`);
-            }
-
-            // Apply element effects
-            if (sword.element === 'Fire' && !gameState.statusEffects.find(e => e.type === 'Burn')) {
-                applyStatusEffect('Burn', damage * 0.2);
-            } else if (sword.element === 'Ice' && !gameState.statusEffects.find(e => e.type === 'Freeze')) {
-                applyStatusEffect('Freeze', damage * 0.1);
-            }
-
-            if (gameState.currentMonster.health <= 0) {
-                handleMonsterDefeat();
-            }
-
-            processStatusEffects();
-            updateGameDisplay();
-        });
+        attackButton.onclick = attackMonster;
     }
 
     // Set up view buttons
     document.querySelectorAll('[data-view]').forEach(button => {
-        button.addEventListener('click', (e) => {
+        button.onclick = (e) => {
             const viewName = e.target.getAttribute('data-view');
             console.log('Button clicked:', viewName); // Debug log
             showView(viewName);
-        });
+        };
     });
 
-    // Set up other buttons
-    const forgeButton = document.querySelector('[onclick="forgeSword()"]');
-    if (forgeButton) {
-        forgeButton.onclick = () => forgeSword();
-    }
-
-    const upgradeButton = document.querySelector('[onclick="upgradeSword()"]');
-    if (upgradeButton) {
-        upgradeButton.onclick = () => upgradeSword();
-    }
-
-    const autoForgeButton = document.querySelector('[onclick="toggleAutoForge()"]');
-    if (autoForgeButton) {
-        autoForgeButton.onclick = () => toggleAutoForge();
-    }
+    // Make functions globally available
+    window.forgeSword = forgeSword;
+    window.upgradeSword = upgradeSword;
+    window.toggleAutoForge = toggleAutoForge;
+    window.craftSword = craftSword;
 }
 
 // Initialization
@@ -411,8 +364,5 @@ function initializeGame() {
     setInterval(saveGame, 30000);
 }
 
-// And make sure this is at the end of your file
-document.addEventListener('DOMContentLoaded', () => {
-    loadGameData();
-    setupEventListeners();
-});
+// Export the loadGameData function to be used by init.js
+export { loadGameData };
