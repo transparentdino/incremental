@@ -26,8 +26,22 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 3fr 1fr;
+    grid-template-columns: 1fr;
     gap: 20px;
+}
+
+/* Stats and Combat Log always visible on the right */
+.stats {
+    position: fixed;
+    right: 20px;
+    top: 80px;
+    width: 300px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    background: #363636;
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid #555;
 }
 
 /* Main Sections */
@@ -37,19 +51,39 @@ body {
     border-radius: 8px;
     border: 2px solid #555;
     display: none;
+    margin-right: 340px; /* Make space for the stats panel */
+    min-height: 500px;
 }
 
 .active-view {
     display: block !important;
 }
 
+/* Area Layouts */
+.hunt-area, .forge-area, .craft-area {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+}
+
 /* Sword Display */
 .sword-display {
     text-align: center;
-    margin: 20px 0;
     padding: 20px;
     background: #2a2a2a;
     border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.sword-properties {
+    margin-top: 15px;
+    padding: 10px;
+    background: #363636;
+    border-radius: 4px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
 }
 
 .sword-image {
@@ -124,12 +158,32 @@ body {
     margin-top: 20px;
 }
 
+/* Controls Sections */
+.forge-controls, .crafting-controls {
+    background: #363636;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.forge-controls button, .crafting-controls button {
+    margin: 10px 5px;
+}
+
 /* Monster Display */
 .monster-display {
     background: #363636;
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 20px;
+    text-align: center;
+}
+
+.monster-display .stat-bar {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 15px 0;
 }
 
 .monster-status {
@@ -159,7 +213,33 @@ body {
 .ice { background: #00ffff44; }
 .poison { background: #aa00ff44; }
 
+/* Crafting Parts */
+.crafting-parts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.part-selector {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.part-selector h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
 /* Progress Bars */
+progress {
+    width: 100%;
+    height: 20px;
+    margin: 5px 0;
+}
+
 #monster-health {
     width: 200px;
     height: 20px;
