@@ -449,6 +449,10 @@ function setupEventListeners() {
 }
 
 // Initialization
+export function initializeGameInterface() {
+    initializeGame();
+}
+
 function initializeGame() {
     try {
         const saveExists = localStorage.getItem('swordForgeSave');

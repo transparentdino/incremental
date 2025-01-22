@@ -123,7 +123,7 @@
             window.monsters = monstersData;
             // Load main game script after data is available
             const script = document.createElement('script');
-            script.src = 'game.js';
+            script.type = 'module'; script.src = 'game.js';
             script.onload = () => {
                 console.log('Game script loaded, initializing interface');
                 initializeGameInterface();
