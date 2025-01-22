@@ -20,7 +20,7 @@ class CORSRequestHandler(SimpleHTTPRequestHandler):
         return super().guess_type(path)
 
 if __name__ == '__main__':
-    port = 50737  # Using the first available port from runtime info
+    port = 52081  # Using the first available port from runtime info
     print(f"Starting server at http://localhost:{port}")
     httpd = HTTPServer(('0.0.0.0', port), CORSRequestHandler)
     httpd.serve_forever()

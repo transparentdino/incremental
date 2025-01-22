@@ -147,20 +147,7 @@
         </div>
     </div>
 
-    <!-- Load game data and scripts -->
-    <script type="module">
-        // Load game data before main script
-        Promise.all([
-            fetch('data/swordParts.json').then(response => response.json()),
-            fetch('data/monsters.json').then(response => response.json())
-        ]).then(([swordPartsData, monstersData]) => {
-            window.swordParts = swordPartsData;
-            window.monsters = monstersData;
-            // Import main game script after data is available
-            import('./game.js');
-        }).catch(error => {
-            console.error('Error loading game data:', error);
-        });
-    </script>
+    <!-- Load game initialization script -->
+    <script type="module" src="init.js"></script>
 </body>
 </html>
