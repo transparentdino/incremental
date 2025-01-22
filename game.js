@@ -1,3 +1,8 @@
+
+
+import { Monster, spawnMonster, handleMonsterDefeat, attackMonster } from './monster.js';
+import { Sword, forgeSword, craftSword, upgradeSword, hasRequiredMaterials, deductMaterials } from './sword.js';
+
 // Load JSON data using fetch API
 async function loadFile(filePath) {
     try {
@@ -17,137 +22,75 @@ async function loadFile(filePath) {
 // Then modify loadGameData to use this
 async function loadGameData() {
     try {
-        // Load sword parts data
-        swordParts = await loadFile('swordParts.json');
+        // Load game data
+        const [swordPartsData, monstersData, areasData] = await Promise.all([
+            loadFile('swordParts.json'),
+            loadFile('monsters.json'),
+            loadFile('areas.json')
+        ]);
         
-        // Load monsters data
-        monsters = await loadFile('monsters.json');
+        swordParts = swordPartsData;
+        monsters = monstersData;
+        gameState.areas = areasData.areas.map(area => new Area(area));
         
-        console.log("Game data loaded:", { swordParts, monsters });
+        // Set default area
+        gameState.currentArea = gameState.areas[0];
+        
+        console.log("Game data loaded:", { swordParts, monsters, areas: gameState.areas });
         initializeGame();
     } catch (error) {
         console.error('Error loading game data:', error);
     }
 }
 
-let gameState = {
+// Export gameState for use in Savegame.js
+window.gameState = {
     scrap: 0,
     currentTier: 1,
     currentSword: null,
     autoForgeInterval: null,
     autoForgeActive: false,
     currentMonster: null,
+    currentArea: null,
+    areas: [],
     upgrades: {
         autoForgeSpeed: 1,
         scrapEfficiency: 1,
         criticalStrike: 0
     },
-    statusEffects: []
+    statusEffects: [],
+    monsterParts: {},
+    craftingRecipes: {
+        'Common Blade': { Scale: 5, Claw: 2 },
+        'Uncommon Blade': { Scale: 10, Claw: 5, Fang: 2 },
+        'Rare Blade': { Scale: 20, Claw: 10, Fang: 5, Gem: 1 },
+        'Common Hilt': { Scale: 3, Claw: 1 },
+        'Uncommon Hilt': { Scale: 6, Claw: 3, Fang: 1 },
+        'Rare Hilt': { Scale: 12, Claw: 6, Fang: 3, Gem: 1 }
+    }
 };
 
 // Classes
-class Sword {
-    constructor(tier, parts = null) {
-        if (!parts) {
-            parts = {
-                blade: swordParts.blades[Math.floor(Math.random() * swordParts.blades.length)],
-                hilt: swordParts.hilts[Math.floor(Math.random() * swordParts.hilts.length)],
-                gem: swordParts.gems[Math.floor(Math.random() * swordParts.gems.length)]
-            };
-        }
-        
-        this.tier = tier;
-        this.parts = parts;
-        this.element = parts.gem ? parts.gem.element : 'None';
-        this.baseDamage = Math.floor(10 * Math.pow(1.5, tier-1)) * parts.blade.damageMultiplier;
-        this.attackSpeed = (1 + tier * 0.2 + parts.hilt.attackSpeedBonus).toFixed(1);
-        this.rarity = this.calculateRarity();
-        this.modifiers = this.calculateModifiers();
-        this.durability = 100;
+class Area {
+    constructor(areaData) {
+        this.id = areaData.id;
+        this.name = areaData.name;
+        this.description = areaData.description;
+        this.monsterTiers = areaData.monsterTiers;
+        this.scrapMultiplier = areaData.scrapMultiplier;
+        this.elementalEffects = areaData.elementalEffects;
     }
-
-    calculateRarity() {
-        const rand = Math.random();
-        if (rand < 0.5) return 'Common';
-        if (rand < 0.8) return 'Uncommon';
-        if (rand < 0.95) return 'Rare';
-        if (rand < 0.99) return 'Epic';
-        return 'Legendary';
-    }
-
-    calculateModifiers() {
-        return {
-            critChance: Math.min(5 + (this.tier * 2) + gameState.upgrades.criticalStrike, 35) + '%',
-            lootBonus: Math.floor(this.tier * 3 * gameState.upgrades.scrapEfficiency) + '%'
-        };
+    
+    getRandomTier() {
+        return this.monsterTiers[Math.floor(Math.random() * this.monsterTiers.length)];
     }
 }
 
-// Import Monster class and functions
-import { 
-    Monster,
-    applyStatusEffect,
-    processStatusEffects,
-    spawnMonster,
-    handleMonsterDefeat,
-    updateMonsterDisplay,
-    updateStatusDisplay
-} from './Monster.js';
+
+
 
 // Combat Functions
-// Make attackMonster function globally accessible
-    window.attackMonster = function() {
-    if (!gameState.currentMonster || gameState.currentMonster.health <= 0) {
-        spawnMonster();
-        return;
-    }
 
-    if (!gameState.currentSword) {
-        addLogMessage("You need a sword to attack!");
-        return;
-    }
-
-    const sword = gameState.currentSword;
-    const damage = calculateDamage(sword);
-    const isCritical = Math.random() < (parseFloat(sword.modifiers.critChance) / 100);
-    
-    const finalDamage = isCritical ? damage * 2 : damage;
-    const previousHealth = gameState.currentMonster.health;
-    gameState.currentMonster.health = Math.max(0, gameState.currentMonster.health - finalDamage);
-    
-    // Debug output
-    console.log('Attack Details:', {
-        sword: sword,
-        baseDamage: damage,
-        isCritical: isCritical,
-        finalDamage: finalDamage,
-        previousHealth: previousHealth,
-        newHealth: gameState.currentMonster.health
-    });
-
-    if (isCritical) {
-        addLogMessage(`Critical hit! Dealt ${finalDamage} damage to ${gameState.currentMonster.name}!`);
-    } else {
-        addLogMessage(`Hit ${gameState.currentMonster.name} for ${finalDamage} damage!`);
-    }
-
-    // Update monster health display immediately
-    updateMonsterDisplay();
-
-    // Apply element effects
-    if (sword.element === 'Fire' && !gameState.statusEffects.find(e => e.type === 'Burn')) {
-        applyStatusEffect('Burn', damage * 0.2);
-    } else if (sword.element === 'Ice' && !gameState.statusEffects.find(e => e.type === 'Freeze')) {
-        applyStatusEffect('Freeze', damage * 0.1);
-    }
-
-    if (gameState.currentMonster.health <= 0) {
-        handleMonsterDefeat();
-    }
-
-    processStatusEffects();
-    updateGameDisplay();
-};
 
 function calculateDamage(sword) {
     if (!sword) return 0;
@@ -155,6 +98,49 @@ function calculateDamage(sword) {
     const variance = 0.3;
     const damage = base * (1 - variance + Math.random() * variance * 2);
     return Math.max(1, Math.floor(damage)); // Ensure at least 1 damage
+}
+
+// Status Effect Functions
+function applyStatusEffect(type, damage) {
+    gameState.statusEffects.push({
+        type,
+        duration: 3,
+        damagePerTick: Math.floor(damage)
+    });
+    updateStatusDisplay();
+}
+
+function processStatusEffects() {
+    if (gameState.statusEffects.length === 0) return;
+    
+    gameState.statusEffects.forEach(effect => {
+        if (effect.duration > 0 && gameState.currentMonster.health > 0) {
+            gameState.currentMonster.health -= effect.damagePerTick;
+            addLogMessage(`${effect.type} dealt ${effect.damagePerTick} damage!`);
+            effect.duration--;
+        }
+    });
+    
+    gameState.statusEffects = gameState.statusEffects.filter(effect => effect.duration > 0);
+    updateStatusDisplay();
+}
+
+// Monster Management
+
+
+function changeArea(areaId) {
+    const newArea = gameState.areas.find(area => area.id === areaId);
+    if (newArea) {
+        gameState.currentArea = newArea;
+        const description = `${newArea.description}\n\nPossible Monsters:\n` +
+            newArea.monsterTiers.map(tier => {
+                const tierData = monsters.tiers.find(t => t.level === tier);
+                return tierData.monsters.map(m => `- ${m.name} (Level ${tier})`).join('\n');
+            }).join('\n');
+        document.getElementById('area-description').textContent = description;
+        spawnMonster();
+        updateGameDisplay();
+    }
 }
 
 
@@ -177,43 +163,7 @@ function createStarterSword() {
     return starterSword;
 }
 
-function forgeSword() {
-    if (gameState.scrap < 50) return;
-    gameState.scrap -= 50;
-    gameState.currentSword = new Sword(gameState.currentTier);
-    updateGameDisplay();
-    addLogMessage("Forged new sword!");
-}
 
-function craftSword() {
-    const selectedBlade = document.getElementById('blade-selector').value;
-    const selectedHilt = document.getElementById('hilt-selector').value;
-    const selectedGem = document.getElementById('gem-selector').value;
-    
-    const blade = swordParts.blades.find(b => b.name === selectedBlade);
-    const hilt = swordParts.hilts.find(h => h.name === selectedHilt);
-    const gem = swordParts.gems.find(g => g.name === selectedGem);
-    
-    const totalCost = blade.scrapCost + hilt.scrapCost + (gem ? gem.scrapCost : 0);
-    
-    if (gameState.scrap < totalCost) {
-        addLogMessage("Not enough scrap!");
-        return;
-    }
-    
-    gameState.scrap -= totalCost;
-    gameState.currentSword = new Sword(gameState.currentTier, {blade, hilt, gem});
-    updateGameDisplay();
-    addLogMessage(`Crafted new ${getSwordName(gameState.currentSword)}!`);
-}
-
-function upgradeSword() {
-    if (gameState.scrap < 100 || !gameState.currentSword) return;
-    gameState.scrap -= 100;
-    gameState.currentTier++;
-    updateGameDisplay();
-    addLogMessage(`Upgraded to Tier ${gameState.currentTier}!`);
-}
 
 function toggleAutoForge() {
     gameState.autoForgeActive = !gameState.autoForgeActive;
@@ -234,6 +184,7 @@ function updateGameDisplay() {
     document.getElementById('scrap').textContent = gameState.scrap;
     document.getElementById('tier').textContent = romanize(gameState.currentTier);
     updateMonsterDisplay();
+    updateInventoryDisplay();
     
     if (gameState.currentSword) {
         document.getElementById('sword-name').textContent = getSwordName(gameState.currentSword);
@@ -249,11 +200,64 @@ function updateGameDisplay() {
     }
 }
 
+function updateInventoryDisplay() {
+    const inventoryElement = document.getElementById('inventory');
+    if (!inventoryElement) return;
+    
+    let inventoryHTML = '<h3>Inventory</h3>';
+    if (Object.keys(gameState.monsterParts).length === 0) {
+        inventoryHTML += '<p>No monster parts yet</p>';
+    } else {
+        inventoryHTML += '<ul>';
+        for (const [part, quantity] of Object.entries(gameState.monsterParts)) {
+            inventoryHTML += `<li>${part}: ${quantity}</li>`;
+        }
+        inventoryHTML += '</ul>';
+    }
+    
+    inventoryElement.innerHTML = inventoryHTML;
+}
 
+function updateMonsterDisplay() {
+    if (!gameState.currentMonster) return;
+    
+    const healthBar = document.getElementById('monster-health');
+    const healthPercent = (gameState.currentMonster.health / gameState.currentMonster.maxHealth) * 100;
+    
+    if (healthBar) {
+        healthBar.value = healthPercent;
+    }
+    
+    const elementDisplay = document.getElementById('monster-element');
+    if (elementDisplay) {
+        elementDisplay.textContent = gameState.currentMonster.element;
+    }
+    
+    const rewardDisplay = document.getElementById('monster-reward');
+    if (rewardDisplay) {
+        rewardDisplay.textContent = Math.floor(gameState.currentMonster.scrapReward);
+    }
+    
+    // Update monster name and level display
+    const monsterNameDisplay = document.getElementById('monster-name');
+    if (monsterNameDisplay) {
+        monsterNameDisplay.textContent = `${gameState.currentMonster.name} (Level ${gameState.currentMonster.level})`;
+    }
+    
+    updateStatusDisplay();
+}
+
+function updateStatusDisplay() {
+    const statusElement = document.getElementById('monster-status');
+    if (!statusElement) return;
+    
+    statusElement.innerHTML = gameState.statusEffects
+        .map(e => `<div class="status-effect ${e.type.toLowerCase()}">${e.type} (${e.duration})</div>`)
+        .join('');
+}
 
 // View Management
 function showView(viewName) {
-    console.log('Showing view:', viewName); // Debug log
     document.querySelectorAll('.main-section').forEach(section => {
         section.classList.remove('active-view');
     });
@@ -264,21 +268,22 @@ function showView(viewName) {
         if (viewName === 'hunt' && !gameState.currentMonster) {
             spawnMonster();
         }
-    } else {
-        console.error('View not found:', viewName);
     }
 }
 
-// Make showView available globally
-window.showView = showView;
-
 // Utility Functions
 function addLogMessage(message) {
+    console.log('Attempting to add log message:', message);
     const log = document.getElementById('combat-log');
+    if (!log) {
+        console.error('Combat log element not found!');
+        return;
+    }
     const entry = document.createElement('div');
     entry.textContent = message;
     log.appendChild(entry);
     log.scrollTop = log.scrollHeight;
+    console.log('Message added to combat log:', message);
 }
 
 function getSwordName(sword) {
@@ -320,40 +325,101 @@ function loadGame() {
 
 // Event Listeners
 function setupEventListeners() {
+    // Set up area selector
+    const areaSelector = document.getElementById('area-selector');
+    if (areaSelector) {
+        areaSelector.addEventListener('change', (e) => {
+            changeArea(e.target.value);
+        });
+    }
+
     // Set up attack button
     const attackButton = document.getElementById('attack-button');
     if (attackButton) {
-        attackButton.onclick = attackMonster;
+        console.log('Attack button found and event listener added');
+        attackButton.addEventListener('click', () => {
+            console.log('Attack button clicked');
+            if (!gameState.currentMonster || gameState.currentMonster.health <= 0) {
+                spawnMonster();
+                return;
+            }
+
+            if (!gameState.currentSword) {
+                addLogMessage("You need a sword to attack!");
+                return;
+            }
+
+            const sword = gameState.currentSword;
+            const damage = calculateDamage(sword);
+            const isCritical = Math.random() < (parseFloat(sword.modifiers.critChance) / 100);
+            
+            const finalDamage = isCritical ? damage * 2 : damage;
+            gameState.currentMonster.health -= finalDamage;
+            
+            if (isCritical) {
+                addLogMessage(`Critical hit! Dealt ${finalDamage} damage to ${gameState.currentMonster.name}!`);
+            } else {
+                addLogMessage(`Hit ${gameState.currentMonster.name} for ${finalDamage} damage!`);
+            }
+
+            // Apply element effects
+            if (sword.element === 'Fire' && !gameState.statusEffects.find(e => e.type === 'Burn')) {
+                applyStatusEffect('Burn', damage * 0.2);
+            } else if (sword.element === 'Ice' && !gameState.statusEffects.find(e => e.type === 'Freeze')) {
+                applyStatusEffect('Freeze', damage * 0.1);
+            }
+
+            if (gameState.currentMonster.health <= 0) {
+                handleMonsterDefeat();
+            }
+
+            processStatusEffects();
+            updateGameDisplay();
+        });
     }
 
     // Set up view buttons
     document.querySelectorAll('[data-view]').forEach(button => {
-        button.onclick = (e) => {
-            const viewName = e.target.getAttribute('data-view');
-            console.log('Button clicked:', viewName); // Debug log
-            showView(viewName);
-        };
+        button.addEventListener('click', (e) => {
+            showView(e.target.dataset.view);
+        });
     });
 
-    // Make functions globally available
-    window.forgeSword = forgeSword;
-    window.upgradeSword = upgradeSword;
-    window.toggleAutoForge = toggleAutoForge;
-    window.craftSword = craftSword;
+    // Set up other buttons
+    const forgeButton = document.querySelector('[onclick="forgeSword()"]');
+    if (forgeButton) {
+        forgeButton.onclick = () => forgeSword();
+    }
+
+    const upgradeButton = document.querySelector('[onclick="upgradeSword()"]');
+    if (upgradeButton) {
+        upgradeButton.onclick = () => upgradeSword();
+    }
+
+    const autoForgeButton = document.querySelector('[onclick="toggleAutoForge()"]');
+    if (autoForgeButton) {
+        autoForgeButton.onclick = () => toggleAutoForge();
+    }
 }
 
 // Initialization
 function initializeGame() {
     try {
+        const saveExists = localStorage.getItem('swordForgeSave');
         loadGame();
-        if (!gameState.currentSword) {
-            gameState.currentSword = createStarterSword();
+        
+        // If no save existed, this is a new game
+        if (!saveExists) {
+            gameState.scrap = 50; // Give player starting scrap
+            gameState.currentTier = 1;
+            saveGame(); // Save initial state
         }
     } catch (e) {
         console.error("Failed to load save:", e);
-        gameState.currentSword = createStarterSword();
-        gameState.scrap = 0;
+        // If loading fails, treat as new game
+        gameState.scrap = 50;
         gameState.currentTier = 1;
+        saveGame();
     }
     
     spawnMonster();
@@ -364,5 +430,145 @@ function initializeGame() {
     setInterval(saveGame, 30000);
 }
 
-// Export the loadGameData function to be used by init.js
-export { loadGameData };
+// And make sure this is at the end of your file
+// Start Screen Functions
+function showGame() {
+    document.getElementById('start-screen').style.display = 'none';
+    document.querySelector('.sidebar').style.display = 'flex';
+    document.querySelector('.container').style.display = 'grid';
+}
+
+function setupStartScreen() {
+    console.log('Setting up start screen...');
+    
+    // Hide game interface initially
+    document.querySelector('.sidebar').style.display = 'none';
+    document.querySelector('.container').style.display = 'none';
+    
+    // New Game Button
+    const newGameBtn = document.getElementById('new-game-btn');
+    if (newGameBtn) {
+        newGameBtn.addEventListener('click', () => {
+            console.log('New game button clicked');
+            localStorage.removeItem('swordForgeSave');
+            initializeGame();
+            showGame();
+        });
+    } else {
+        console.error('New game button not found!');
+    }
+
+    // Load Game Button
+    const loadGameBtn = document.getElementById('load-game-btn');
+    if (loadGameBtn) {
+        loadGameBtn.addEventListener('click', () => {
+            console.log('Load game button clicked');
+            initializeGame();
+            showGame();
+        });
+    } else {
+        console.error('Load game button not found!');
+    }
+
+    // Import Save Button
+    const importSaveBtn = document.getElementById('import-save-btn');
+    if (importSaveBtn) {
+        importSaveBtn.addEventListener('click', () => {
+            console.log('Import save button clicked');
+            const saveCode = document.getElementById('save-code-input').value;
+            if (saveCode) {
+                try {
+                    localStorage.setItem('swordForgeSave', saveCode);
+                    initializeGame();
+                    showGame();
+                } catch (error) {
+                    console.error('Import failed:', error);
+                    alert('Invalid save code!');
+                }
+            }
+        });
+    } else {
+        console.error('Import save button not found!');
+    }
+
+    // Export Save Button
+    const exportSaveBtn = document.getElementById('export-save-btn');
+    if (exportSaveBtn) {
+        exportSaveBtn.addEventListener('click', () => {
+            console.log('Export save button clicked');
+            saveGame();
+            const saveCode = localStorage.getItem('swordForgeSave');
+            document.getElementById('save-code-input').value = saveCode;
+            alert('Save code copied to input box!');
+        });
+    } else {
+        console.error('Export save button not found!');
+    }
+}
+    console.log('Setting up start screen...');
+    
+    // Hide game interface initially
+    document.querySelector('.sidebar').style.display = 'none';
+    document.querySelector('.container').style.display = 'none';
+    
+    const newGameBtn = document.getElementById('new-game-btn');
+    if (newGameBtn) {
+        newGameBtn.addEventListener('click', () => {
+            console.log('New game button clicked');
+            localStorage.removeItem('swordForgeSave');
+            initializeGame();
+            showGame();
+        });
+    } else {
+        console.error('New game button not found!');
+    }
+    document.getElementById('new-game-btn').addEventListener('click', () => {
+        localStorage.removeItem('swordForgeSave');
+        initializeGame();
+        showGame();
+    });
+
+    document.getElementById('load-game-btn').addEventListener('click', () => {
+        initializeGame();
+        showGame();
+    });
+
+    document.getElementById('import-save-btn').addEventListener('click', () => {
+        const saveCode = document.getElementById('save-code-input').value;
+        if (saveCode) {
+            try {
+                localStorage.setItem('swordForgeSave', saveCode);
+                initializeGame();
+                showGame();
+            } catch (error) {
+                alert('Invalid save code!');
+            }
+        }
+    });
+
+    document.getElementById('export-save-btn').addEventListener('click', () => {
+        saveGame();
+        const saveCode = localStorage.getItem('swordForgeSave');
+        document.getElementById('save-code-input').value = saveCode;
+        alert('Save code copied to input box!');
+    });
+
+// Initialize the game interface and make it globally accessible
+window.initializeGameInterface = function() {
+    console.log('Initializing game interface...');
+    try {
+        setupStartScreen();
+        loadGameData();
+        setupEventListeners();
+        console.log('Game interface initialized successfully');
+    } catch (error) {
+        console.error('Error initializing game interface:', error);
+        alert('Failed to initialize game!');
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    initializeGameInterface();
+    loadGameData();
+    setupEventListeners();
+});

@@ -1,0 +1,26 @@
+{
+    "areas": [
+        {
+            "id": "forest",
+            "name": "Ancient Forest",
+            "description": "A dense forest filled with common wildlife",
+            "monsterTiers": [1],
+            "scrapMultiplier": 1.0,
+            "elementalEffects": {
+                "Fire": 0.8,
+                "Ice": 1.2
+            }
+        },
+        {
+            "id": "volcano",
+            "name": "Volcanic Crater",
+            "description": "A dangerous volcanic area with fire-based creatures",
+            "monsterTiers": [2],
+            "scrapMultiplier": 1.5,
+            "elementalEffects": {
+                "Fire": 1.5,
+                "Ice": 0.5
+            }
+        }
+    ]
+}
