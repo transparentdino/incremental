@@ -1,3 +1,5 @@
+import { updateMonsterDisplay, addLogMessage, updateGameDisplay } from './game.js';
+
 class Monster {
     constructor(tier) {
         const tierData = monsters.tiers.find(t => t.level === tier) || monsters.tiers[0];
