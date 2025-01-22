@@ -246,23 +246,7 @@ function updateGameDisplay() {
     }
 }
 
-function updateInventoryDisplay() {
-    const inventoryElement = document.getElementById('inventory');
-    if (!inventoryElement) return;
-    
-    let inventoryHTML = '<h3>Inventory</h3>';
-    if (Object.keys(gameState.monsterParts).length === 0) {
-        inventoryHTML += '<p>No monster parts yet</p>';
-    } else {
-        inventoryHTML += '<ul>';
-        for (const [part, quantity] of Object.entries(gameState.monsterParts)) {
-            inventoryHTML += `<li>${part}: ${quantity}</li>`;
-        }
-        inventoryHTML += '</ul>';
-    }
-    
-    inventoryElement.innerHTML = inventoryHTML;
-}
+
 
 function updateMonsterDisplay() {
     if (!gameState.currentMonster) return;
@@ -318,7 +302,7 @@ function showView(viewName) {
 }
 
 // Utility Functions
-function addLogMessage(message) {
+export function addLogMessage(message) {
     console.log('Attempting to add log message:', message);
     const log = document.getElementById('combat-log');
     if (!log) {
@@ -449,6 +433,10 @@ function setupEventListeners() {
 }
 
 // Initialization
+export function initializeGameInterface() {
+    initializeGame();
+}
+
 function initializeGame() {
     try {
         const saveExists = localStorage.getItem('swordForgeSave');
