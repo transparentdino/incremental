@@ -124,6 +124,7 @@
             // Load main game script after data is available
             const script = document.createElement('script');
             script.type = 'module'; script.src = 'game.js';
+window.initializeGameInterface = initializeGameInterface;
             script.onload = () => {
                 console.log('Game script loaded, initializing interface');
                 initializeGameInterface();
