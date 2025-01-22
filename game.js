@@ -59,7 +59,11 @@ window.gameState = {
         criticalStrike: 0
     },
     statusEffects: [],
-    monsterParts: {},
+    inventory: {
+        monsterParts: {},
+        craftingMaterials: {},
+        swords: []
+    },
     craftingRecipes: {
         'Common Blade': { Scale: 5, Claw: 2 },
         'Uncommon Blade': { Scale: 10, Claw: 5, Fang: 2 },
@@ -69,6 +73,48 @@ window.gameState = {
         'Rare Hilt': { Scale: 12, Claw: 6, Fang: 3, Gem: 1 }
     }
 };
+
+// Inventory Management Functions
+function addToInventory(item, quantity, category = 'monsterParts') {
+    if (!gameState.inventory[category]) {
+        console.error(`Invalid inventory category: ${category}`);
+        return;
+    }
+    gameState.inventory[category][item] = (gameState.inventory[category][item] || 0) + quantity;
+    updateInventoryDisplay();
+}
+
+function removeFromInventory(item, quantity, category = 'monsterParts') {
+    if (!gameState.inventory[category] || !gameState.inventory[category][item]) {
+        console.error(`Item not found in inventory: ${item}`);
+        return;
+    }
+    gameState.inventory[category][item] -= quantity;
+    if (gameState.inventory[category][item] <= 0) {
+        delete gameState.inventory[category][item];
+    }
+    updateInventoryDisplay();
+}
+
+function updateInventoryDisplay() {
+    const inventoryElement = document.getElementById('inventory');
+    if (!inventoryElement) return;
+
+    let inventoryHTML = '<h3>Inventory</h3>';
+    for (const [category, items] of Object.entries(gameState.inventory)) {
+        inventoryHTML += `<h4>${category}</h4>`;
+        if (Object.keys(items).length === 0) {
+            inventoryHTML += `<p>No ${category} yet</p>`;
+        } else {
+            inventoryHTML += '<ul>';
+            for (const [item, quantity] of Object.entries(items)) {
+                inventoryHTML += `<li>${item}: ${quantity}</li>`;
+            }
+            inventoryHTML += '</ul>';
+        }
+    }
+    inventoryElement.innerHTML = inventoryHTML;
+}
 
 // Classes
 class Area {
@@ -412,6 +458,10 @@ function initializeGame() {
         if (!saveExists) {
             gameState.scrap = 50; // Give player starting scrap
             gameState.currentTier = 1;
+            // Add test items to inventory
+            addToInventory('Scale', 5, 'monsterParts');
+            addToInventory('Claw', 3, 'monsterParts');
+            addToInventory('Iron', 10, 'craftingMaterials');
             saveGame(); // Save initial state
         }
     } catch (e) {
@@ -424,6 +474,7 @@ function initializeGame() {
     
     spawnMonster();
     updateGameDisplay();
+    updateInventoryDisplay(); // Initialize inventory display
     setupEventListeners(); // Make sure this is called
     showView('forge');
     
