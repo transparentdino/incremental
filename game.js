@@ -302,7 +302,7 @@ function showView(viewName) {
 }
 
 // Utility Functions
-function addLogMessage(message) {
+export function addLogMessage(message) {
     console.log('Attempting to add log message:', message);
     const log = document.getElementById('combat-log');
     if (!log) {

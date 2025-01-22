@@ -126,7 +126,7 @@
             script.type = 'module'; script.src = 'game.js';
 script.onload = () => {
                 console.log('Game script loaded, initializing interface');
-                window.initializeGameInterface();
+                window.initializeGameInterface = initializeGameInterface;
             };
             document.body.appendChild(script);
         }).catch(error => {
